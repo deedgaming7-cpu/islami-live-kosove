@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="sq">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kohët e Namazit — Kosovë</title>
+    <meta name="description"
+        content="Kohët e namazit dhe kohënumëruesi i Iftarit dhe Syfyrit për Kosovë, bazuar në takvimi-ks.com">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Takvimi">
+    <link rel="stylesheet" href="style.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Montserrat:wght@300;400;600&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>Takvimi i Ramazanit</h1>
+            <div class="location-container">
+                <p id="location-text">Kosovë</p>
+            </div>
+        </header>
+
+        <!-- ========== PRAYER TIMES VIEW ========== -->
+        <div id="prayer-view">
+            <main>
+                <div id="loading" class="loading">Duke marrë kohët e namazit...</div>
+
+                <div id="timer-container" class="hidden">
+                    <h2 id="next-event-label">Koha deri në Iftar</h2>
+                    <div id="countdown" class="countdown">00:00:00</div>
+                    <div id="next-event-time" class="sub-time">në 00:00</div>
+                </div>
+
+                <div id="dua-container" class="dua-container hidden">
+                    <h3>Duaja për <span id="dua-type">Iftarin</span></h3>
+                    <p id="dua-arabic" class="arabic"></p>
+                    <p id="dua-translation" class="translation"></p>
+                </div>
+
+                <div class="prayers-list">
+                    <h3>Kohët e sotme</h3>
+                    <ul id="prayers-ul">
+                        <!-- Javascript do ta mbushë këtë -->
+                    </ul>
+                </div>
+            </main>
+
+            <footer>
+                <div class="footer-controls">
+                    <button id="notify-btn">Aktivizo Njoftimet</button>
+                </div>
+                <p style="margin-top: 1rem; font-size: 0.8rem; opacity: 0.7;">Kohët bazuar në Kosovë.</p>
+            </footer>
+        </div>
+
+        <!-- ========== QUR'AN VIEW ========== -->
+        <div id="quran-view" class="hidden">
+            <!-- Surah List -->
+            <div id="surah-list-container">
+                <div class="quran-header">
+                    <h2>📖 Lexo Kur'anin</h2>
+                    <p class="quran-subtitle">Përkthimi në shqip — Feti Mehdiu</p>
+                </div>
+                <div id="surah-search-container">
+                    <input type="text" id="surah-search" placeholder="Kërko sure..." autocomplete="off">
+                </div>
+                <div id="surah-list" class="surah-list">
+                    <!-- JS populates -->
+                </div>
+            </div>
+
+            <!-- Surah Reader -->
+            <div id="surah-reader" class="hidden">
+                <div class="reader-nav-top">
+                    <button id="reader-back-btn" class="reader-btn">← Kthehu</button>
+                    <div class="reader-surah-info">
+                        <span id="reader-surah-name" class="reader-surah-name"></span>
+                        <span id="reader-surah-arabic" class="reader-surah-arabic"></span>
+                    </div>
+                    <span id="reader-ayah-count" class="reader-ayah-count"></span>
+                </div>
+
+                <div id="reader-loading" class="loading hidden">Duke ngarkuar suren...</div>
+
+                <div id="reader-verses" class="reader-verses">
+                    <!-- JS populates verses -->
+                </div>
+
+                <div class="reader-nav-bottom">
+                    <button id="prev-surah-btn" class="reader-btn">← Surja e mëparshme</button>
+                    <button id="next-surah-btn" class="reader-btn">Surja tjetër →</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <nav id="bottom-nav" class="bottom-nav">
+        <button class="nav-tab active" data-view="prayer-view" id="nav-prayer">
+            <span class="nav-icon">🕌</span>
+            <span class="nav-label">Namazit</span>
+        </button>
+        <button class="nav-tab" data-view="quran-view" id="nav-quran">
+            <span class="nav-icon">📖</span>
+            <span class="nav-label">Kur'ani</span>
+        </button>
+    </nav>
+
+    <script src="script.js"></script>
+</body>
+
+</html>

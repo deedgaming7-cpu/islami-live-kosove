@@ -1,0 +1,10 @@
+.vercel
+node_modules
+takvimi_debug.html
+vc
+vc.cmd
+vc.ps1
+vercel
+vercel.cmd
+vercel.ps1
+generate_icon.ps1
