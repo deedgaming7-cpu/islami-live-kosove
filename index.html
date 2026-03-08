@@ -4,15 +4,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kohët e Namazit — Kosovë</title>
+    <title>Islami Shqip</title>
     <meta name="description"
         content="Kohët e namazit dhe kohënumëruesi i Iftarit dhe Syfyrit për Kosovë, bazuar në takvimi-ks.com">
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="icon.png">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Takvimi">
+    <meta name="apple-mobile-web-app-title" content="Islami Shqip">
     <link rel="stylesheet" href="style.css">
     <link
         href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Montserrat:wght@300;400;600&display=swap"
@@ -22,7 +23,7 @@
 <body>
     <div class="container">
         <header>
-            <h1>Takvimi i Ramazanit</h1>
+            <h1>Islami Shqip</h1>
             <div class="location-container">
                 <p id="location-text">Kosovë</p>
             </div>
@@ -67,7 +68,7 @@
             <div id="surah-list-container">
                 <div class="quran-header">
                     <h2>📖 Lexo Kur'anin</h2>
-                    <p class="quran-subtitle">Përkthimi në shqip — Feti Mehdiu</p>
+                    <p class="quran-subtitle">Kërko dhe lexo me përkthim & transliterim</p>
                 </div>
                 <div id="surah-search-container">
                     <input type="text" id="surah-search" placeholder="Kërko sure..." autocomplete="off">
@@ -85,8 +86,34 @@
                         <span id="reader-surah-name" class="reader-surah-name"></span>
                         <span id="reader-surah-arabic" class="reader-surah-arabic"></span>
                     </div>
+                    <button id="audio-play-btn" class="reader-btn audio-btn" title="Luaj Audio">
+                        <span class="audio-icon">▶</span>
+                    </button>
                     <span id="reader-ayah-count" class="reader-ayah-count"></span>
                 </div>
+
+                <!-- Display Settings -->
+                <div class="reader-settings">
+                    <div class="setting-toggle">
+                        <label for="show-arabic">Arabisht</label>
+                        <input type="checkbox" id="show-arabic" checked>
+                    </div>
+                    <div class="setting-toggle">
+                        <label for="show-translation">Përkthimi</label>
+                        <input type="checkbox" id="show-translation" checked>
+                    </div>
+                    <div class="setting-toggle">
+                        <label for="show-transliteration">Transliterimi</label>
+                        <input type="checkbox" id="show-transliteration" checked>
+                    </div>
+                </div>
+                
+                <div id="audio-progress-container" class="audio-progress-container hidden">
+                    <div class="audio-time" id="audio-time-current">0:00</div>
+                    <input type="range" id="audio-progress" min="0" max="100" value="0">
+                    <div class="audio-time" id="audio-time-total">0:00</div>
+                </div>
+                <audio id="surah-audio" style="display:none;"></audio>
 
                 <div id="reader-loading" class="loading hidden">Duke ngarkuar suren...</div>
 
@@ -100,20 +127,133 @@
                 </div>
             </div>
         </div>
+
+        <!-- ========== QIBLA VIEW ========== -->
+        <div id="qibla-view" class="hidden">
+            <header>
+                <h2>Kibla</h2>
+                <p class="tab-subtitle">Drejtimi i saktë kah Qabja</p>
+            </header>
+            <main class="qibla-main">
+                <div id="qibla-container" class="qibla-container">
+                    <div class="compass-outer">
+                        <div class="compass-inner" id="compass">
+                            <div class="compass-arrow" id="compass-arrow"></div>
+                            <div class="compass-kaaba" id="compass-kaaba">🕋</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="qibla-info">
+                    <button id="calibrate-compass-btn" class="action-btn">Kërko Leje për Busullën</button>
+                    <p id="qibla-status" class="qibla-status">Ju lutem kalibroni pajisjen tuaj duke e lëvizur në formë të numrit 8.</p>
+                </div>
+            </main>
+        </div>
+
+        <!-- ========== MORE VIEW ========== -->
+        <div id="more-view" class="hidden">
+            <header>
+                <h2>Burime tjera</h2>
+            </header>
+            <div class="more-grid">
+                <!-- 99 Names -->
+                <div class="more-card" id="open-names-btn">
+                    <span class="more-icon">🤲</span>
+                    <span class="more-title">99 Emrat e Allahut</span>
+                </div>
+                <!-- Dhikr -->
+                <div class="more-card" id="open-dhikr-btn">
+                    <span class="more-icon">📿</span>
+                    <span class="more-title">Dhikr (Tespih)</span>
+                </div>
+                <!-- Abdest/Gusl -->
+                <div class="more-card" id="open-abdest-btn">
+                    <span class="more-icon">💧</span>
+                    <span class="more-title">Abdesti dhe Gusli</span>
+                </div>
+            </div>
+
+            <!-- Modals for More View (hidden by default) -->
+            
+            <!-- 99 Names Modal -->
+            <div id="names-modal" class="modal hidden">
+                <div class="modal-content">
+                    <button class="close-modal-btn">✕</button>
+                    <h3>99 Emrat e Allahut</h3>
+                    <div id="names-list" class="names-list"></div>
+                </div>
+            </div>
+
+            <!-- Dhikr Modal -->
+            <div id="dhikr-modal" class="modal hidden">
+                <div class="modal-content dhikr-modal-content">
+                    <button class="close-modal-btn">✕</button>
+                    <h3>Dhikr / Tespih</h3>
+                    <div class="dhikr-select">
+                        <button class="dhikr-btn active" data-target="33">33</button>
+                        <button class="dhikr-btn" data-target="99">99</button>
+                        <button class="dhikr-btn" data-target="infinity">∞</button>
+                    </div>
+                    <div class="dhikr-counter" id="dhikr-count-display">0</div>
+                    <div class="dhikr-goal" id="dhikr-goal-display">Nga 33</div>
+                    <button class="dhikr-tap-area" id="dhikr-tap">Prek Këtu</button>
+                    <button class="dhikr-reset-btn" id="dhikr-reset">⟲ Fillo nga e para</button>
+                </div>
+            </div>
+
+            <!-- Abdest Modal -->
+            <div id="abdest-modal" class="modal hidden">
+                <div class="modal-content text-left">
+                    <button class="close-modal-btn">✕</button>
+                    <h3>Abdesti dhe Gusli</h3>
+                    <div class="article-content">
+                        <h4>Marrja e abdestit</h4>
+                        <ol>
+                            <li><strong>Nijeti:</strong> Tregohet se qëllimi yt është për të marrë abdest.</li>
+                            <li><strong>Bismilah:</strong> Themi "Bismil-lahirr-Rrahmanirr-Rrahim".</li>
+                            <li><strong>Duart:</strong> Lahen të dy duart deri në nyje (3 herë).</li>
+                            <li><strong>Goja:</strong> Shpëlahet goja (3 herë).</li>
+                            <li><strong>Hunda:</strong> Futet uji në hundë dhe nxirret (3 herë).</li>
+                            <li><strong>Fytyra:</strong> Lahet fytyra (3 herë).</li>
+                            <li><strong>Krahët:</strong> Lahet krahu i djathtë, pastaj i majti deri mbi bërryl (3 herë).</li>
+                            <li><strong>Mesh:</strong> Fshihet koka me duar të lagura (1 herë).</li>
+                            <li><strong>Veshët:</strong> Pastrohen veshët, brenda dhe jashtë (1 herë).</li>
+                            <li><strong>Këmbët:</strong> Lahet këmba e djathtë, pastaj e majta deri mbi kyçe (3 herë).</li>
+                        </ol>
+                        <h4>Gusli (Pastrimi i plotë)</h4>
+                        <ol>
+                            <li>Bëjmë nijetin.</li>
+                            <li>Lajmë duart dhe hapësirat intime.</li>
+                            <li>Marrim abdest të plotë.</li>
+                            <li>Hedhim ujë mbi kokë, pastaj në anën e djathtë, pastaj në të majtën, duke fërkuar gjithë trupin, pa lënë asnjë vend të thatë.</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Bottom Navigation -->
     <nav id="bottom-nav" class="bottom-nav">
         <button class="nav-tab active" data-view="prayer-view" id="nav-prayer">
             <span class="nav-icon">🕌</span>
-            <span class="nav-label">Namazit</span>
+            <span class="nav-label">Namaz</span>
         </button>
         <button class="nav-tab" data-view="quran-view" id="nav-quran">
             <span class="nav-icon">📖</span>
-            <span class="nav-label">Kur'ani</span>
+            <span class="nav-label">Kur'an</span>
+        </button>
+        <button class="nav-tab" data-view="qibla-view" id="nav-qibla">
+            <span class="nav-icon">🧭</span>
+            <span class="nav-label">Kibla</span>
+        </button>
+        <button class="nav-tab" data-view="more-view" id="nav-more">
+            <span class="nav-icon">⭐</span>
+            <span class="nav-label">Më shumë</span>
         </button>
     </nav>
 
+    <script src="names.js"></script>
     <script src="script.js"></script>
 </body>
 

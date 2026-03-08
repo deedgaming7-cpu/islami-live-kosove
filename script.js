@@ -31,6 +31,40 @@ document.addEventListener('DOMContentLoaded', () => {
     const readerVerses = document.getElementById('reader-verses');
     const prevSurahBtn = document.getElementById('prev-surah-btn');
     const nextSurahBtn = document.getElementById('next-surah-btn');
+    // --- DOM Elements (Qur'an Settings & Audio) ---
+    const audioPlayBtn = document.getElementById('audio-play-btn');
+    const audioProgressContainer = document.getElementById('audio-progress-container');
+    const audioProgress = document.getElementById('audio-progress');
+    const audioTimeCurrent = document.getElementById('audio-time-current');
+    const audioTimeTotal = document.getElementById('audio-time-total');
+    const surahAudio = document.getElementById('surah-audio');
+    const showArabicCheckbox = document.getElementById('show-arabic');
+    const showTranslationCheckbox = document.getElementById('show-translation');
+    const showTransliterationCheckbox = document.getElementById('show-transliteration');
+
+    // --- DOM Elements (Qibla) ---
+    const qiblaView = document.getElementById('qibla-view');
+    const compassInner = document.getElementById('compass');
+    const calibrateCompassBtn = document.getElementById('calibrate-compass-btn');
+    const qiblaStatus = document.getElementById('qibla-status');
+
+    // --- DOM Elements (More / Modals) ---
+    const moreView = document.getElementById('more-view');
+    const openNamesBtn = document.getElementById('open-names-btn');
+    const openDhikrBtn = document.getElementById('open-dhikr-btn');
+    const openAbdestBtn = document.getElementById('open-abdest-btn');
+    const namesModal = document.getElementById('names-modal');
+    const dhikrModal = document.getElementById('dhikr-modal');
+    const abdestModal = document.getElementById('abdest-modal');
+    const closeBtns = document.querySelectorAll('.close-modal-btn');
+    const namesList = document.getElementById('names-list');
+    
+    // Dhikr Elements
+    const dhikrTapBtn = document.getElementById('dhikr-tap');
+    const dhikrResetBtn = document.getElementById('dhikr-reset');
+    const dhikrCountDisplay = document.getElementById('dhikr-count-display');
+    const dhikrGoalDisplay = document.getElementById('dhikr-goal-display');
+    const dhikrGoalBtns = document.querySelectorAll('.dhikr-btn');
 
     // --- State ---
     let prayerTimes = null;
@@ -38,6 +72,11 @@ document.addEventListener('DOMContentLoaded', () => {
     let notified = {}; // track which prayers have been notified today
     let currentSurah = null;
     let surahListRendered = false;
+    let namesLoaded = false;
+    let dhikrCount = 0;
+    let dhikrGoal = 33;
+    let qiblaHeading = 137; // Default Qibla angle from North for Kosovo
+    let compassWatchId = null;
 
     // --- API Config ---
     const QURAN_API_BASE = 'https://cdn.jsdelivr.net/gh/fawazahmed0/quran-api@1';
@@ -223,6 +262,9 @@ document.addEventListener('DOMContentLoaded', () => {
         fetchPrayerTimes();
         setupNavigation();
         setupQuranEvents();
+        setupSettingsEvents();
+        setupMoreEvents();
+        setupQiblaEvents();
     }
 
     // =============================================
@@ -238,6 +280,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function switchView(viewId) {
+        // Pause audio if leaving quran-view
+        if (viewId !== 'quran-view' && !surahAudio.paused) {
+            surahAudio.pause();
+            audioPlayBtn.innerHTML = '<span class="audio-icon">▶</span>';
+        }
+
         // Update tabs
         navTabs.forEach(t => t.classList.remove('active'));
         document.querySelector(`[data-view="${viewId}"]`).classList.add('active');
@@ -245,6 +293,8 @@ document.addEventListener('DOMContentLoaded', () => {
         // Update views
         prayerView.classList.add('hidden');
         quranView.classList.add('hidden');
+        qiblaView.classList.add('hidden');
+        moreView.classList.add('hidden');
 
         if (viewId === 'prayer-view') {
             prayerView.classList.remove('hidden');
@@ -254,6 +304,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 renderSurahList();
                 surahListRendered = true;
             }
+        } else if (viewId === 'qibla-view') {
+            qiblaView.classList.remove('hidden');
+        } else if (viewId === 'more-view') {
+            moreView.classList.remove('hidden');
         }
     }
 
@@ -269,6 +323,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Back button
         readerBackBtn.addEventListener('click', () => {
+            if (!surahAudio.paused) {
+                surahAudio.pause();
+                audioPlayBtn.innerHTML = '<span class="audio-icon">▶</span>';
+            }
             showSurahList();
         });
 
@@ -284,6 +342,65 @@ document.addEventListener('DOMContentLoaded', () => {
                 openSurah(currentSurah + 1);
             }
         });
+    }
+
+    function setupSettingsEvents() {
+        showArabicCheckbox.addEventListener('change', updateVerseVisibility);
+        showTranslationCheckbox.addEventListener('change', updateVerseVisibility);
+        showTransliterationCheckbox.addEventListener('change', updateVerseVisibility);
+
+        audioPlayBtn.addEventListener('click', toggleAudio);
+        audioProgress.addEventListener('input', () => {
+            if (surahAudio.duration) {
+                surahAudio.currentTime = (audioProgress.value / 100) * surahAudio.duration;
+            }
+        });
+        
+        surahAudio.addEventListener('timeupdate', () => {
+            if (surahAudio.duration) {
+                const percent = (surahAudio.currentTime / surahAudio.duration) * 100;
+                audioProgress.value = percent;
+                audioTimeCurrent.textContent = formatTime(surahAudio.currentTime);
+            }
+        });
+
+        surahAudio.addEventListener('ended', () => {
+            audioPlayBtn.innerHTML = '<span class="audio-icon">▶</span>';
+            audioProgress.value = 0;
+            audioTimeCurrent.textContent = "0:00";
+        });
+
+        surahAudio.addEventListener('loadedmetadata', () => {
+            audioTimeTotal.textContent = formatTime(surahAudio.duration);
+            audioProgressContainer.classList.remove('hidden');
+        });
+    }
+
+    function updateVerseVisibility() {
+        const showAr = showArabicCheckbox.checked;
+        const showTr = showTranslationCheckbox.checked;
+        const showTl = showTransliterationCheckbox.checked;
+
+        document.querySelectorAll('.verse-arabic').forEach(el => el.style.display = showAr ? 'block' : 'none');
+        document.querySelectorAll('.verse-translation').forEach(el => el.style.display = showTr ? 'block' : 'none');
+        document.querySelectorAll('.verse-transliteration').forEach(el => el.style.display = showTl ? 'block' : 'none');
+    }
+
+    function toggleAudio() {
+        if (surahAudio.paused) {
+            surahAudio.play();
+            audioPlayBtn.innerHTML = '<span class="audio-icon">⏸</span>';
+        } else {
+            surahAudio.pause();
+            audioPlayBtn.innerHTML = '<span class="audio-icon">▶</span>';
+        }
+    }
+
+    function formatTime(seconds) {
+        if (isNaN(seconds)) return "0:00";
+        const m = Math.floor(seconds / 60);
+        const s = Math.floor(seconds % 60);
+        return `${m}:${s.toString().padStart(2, '0')}`;
     }
 
     function renderSurahList() {
@@ -372,17 +489,33 @@ document.addEventListener('DOMContentLoaded', () => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
 
         try {
-            // Fetch Arabic and Albanian in parallel
-            const [arabicRes, albanianRes] = await Promise.all([
+            // Fetch Arabic, Albanian, and Transliteration
+            const [arabicRes, albanianRes, transRes] = await Promise.all([
                 fetch(`${QURAN_API_BASE}/editions/${ARABIC_EDITION}/${surahNumber}.json`),
-                fetch(`${QURAN_API_BASE}/editions/${ALBANIAN_EDITION}/${surahNumber}.json`)
+                fetch(`${QURAN_API_BASE}/editions/${ALBANIAN_EDITION}/${surahNumber}.json`),
+                fetch(`https://api.alquran.cloud/v1/surah/${surahNumber}/en.transliteration`)
             ]);
 
             const arabicData = await arabicRes.json();
             const albanianData = await albanianRes.json();
+            let transVerses = [];
+            
+            if (transRes.ok) {
+                const transData = await transRes.json();
+                transVerses = transData.data.ayahs.map(a => ({ text: a.text }));
+            }
+
+            // Prep Audio
+            surahAudio.src = `https://cdn.islamic.network/quran/audio-surah/128/ar.alafasy/${surahNumber}.mp3`;
+            surahAudio.load();
+            audioPlayBtn.innerHTML = '<span class="audio-icon">▶</span>';
+            audioProgressContainer.classList.add('hidden');
+            audioProgress.value = 0;
+            audioTimeCurrent.textContent = "0:00";
 
             readerLoading.classList.add('hidden');
-            renderVerses(surahNumber, arabicData.chapter, albanianData.chapter);
+            renderVerses(surahNumber, arabicData.chapter, albanianData.chapter, transVerses);
+            updateVerseVisibility(); // Apply current toggles
         } catch (err) {
             console.error('Failed to fetch surah:', err);
             readerLoading.classList.add('hidden');
@@ -396,7 +529,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function renderVerses(surahNumber, arabicVerses, albanianVerses) {
+    function renderVerses(surahNumber, arabicVerses, albanianVerses, transliterationVerses) {
         readerVerses.innerHTML = '';
 
         // Add Bismillah for all surahs except Al-Fatiha (already has it as verse 1) and At-Tawba (no bismillah)
@@ -409,6 +542,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         arabicVerses.forEach((arVerse, index) => {
             const albVerse = albanianVerses[index];
+            const trVerse = transliterationVerses[index];
             const card = document.createElement('div');
             card.className = 'verse-card';
             card.style.animationDelay = `${Math.min(index * 0.03, 0.5)}s`;
@@ -416,6 +550,7 @@ document.addEventListener('DOMContentLoaded', () => {
             card.innerHTML = `
                 <div class="verse-number-badge">${arVerse.verse}</div>
                 <div class="verse-arabic">${arVerse.text}</div>
+                <div class="verse-transliteration">${trVerse ? trVerse.text : ''}</div>
                 <div class="verse-translation">${albVerse ? albVerse.text : ''}</div>
             `;
 
@@ -439,21 +574,7 @@ document.addEventListener('DOMContentLoaded', () => {
         locationText.textContent = 'Kosovë';
 
         try {
-            const response = await fetch('/api/prayer-times');
-            const data = await response.json();
-
-            if (response.ok && data.times) {
-                prayerTimes = data.times;
-                displayPrayerList(prayerTimes);
-                startCountdown();
-                return;
-            }
-        } catch (e) {
-            console.warn('Takvimi-KS scraper failed, falling back to AlAdhan:', e);
-        }
-
-        // Fallback
-        try {
+            // Since we're running locally, we should try falling back to AlAdhan directly first
             const dateStr = getTodayDateStr();
             const url = ALADHAN_FALLBACK_URL.replace('{DATE}', dateStr);
             const response = await fetch(url);
@@ -526,20 +647,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (now < imsakuTime) {
             targetTime = imsakuTime;
-            eventName = "Syfyri (Imsaku)";
+            eventName = "Syfyr (Imsak)";
             nextDua = duAs.suhoor;
             duaTypeEl.textContent = "Syfyrin";
             highlightPrayer('Imsaku');
         } else if (now >= imsakuTime && now < akshamiTime) {
             targetTime = akshamiTime;
-            eventName = "Iftari (Akshami)";
+            eventName = "Iftar (Aksham)";
             nextDua = duAs.iftar;
             duaTypeEl.textContent = "Iftarin";
             highlightPrayer('Akshami');
         } else {
             targetTime = new Date(imsakuTime);
             targetTime.setDate(targetTime.getDate() + 1);
-            eventName = "Syfyri (Imsaku)";
+            eventName = "Syfyr (Imsak)";
             nextDua = duAs.suhoor;
             duaTypeEl.textContent = "Syfyrin";
             highlightPrayer('Imsaku');
@@ -659,4 +780,214 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
     }
+
+    // =============================================
+    //  MORE TAB (Burime tjera)
+    // =============================================
+    function setupMoreEvents() {
+        openNamesBtn.addEventListener('click', () => {
+            namesModal.classList.remove('hidden');
+            if (!namesLoaded) fetch99Names();
+        });
+
+        openDhikrBtn.addEventListener('click', () => {
+            dhikrModal.classList.remove('hidden');
+        });
+
+        openAbdestBtn.addEventListener('click', () => {
+            abdestModal.classList.remove('hidden');
+        });
+
+        closeBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                btn.closest('.modal').classList.add('hidden');
+            });
+        });
+
+        // Close when clicking outside content
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.classList.add('hidden');
+                }
+            });
+        });
+
+        // Dhikr Logic
+        dhikrTapBtn.addEventListener('click', () => {
+            dhikrCount++;
+            updateDhikrDisplay();
+            
+            // Haptic feedback if supported
+            if (navigator.vibrate) navigator.vibrate(50);
+        });
+
+        dhikrResetBtn.addEventListener('click', () => {
+            dhikrCount = 0;
+            updateDhikrDisplay();
+        });
+
+        dhikrGoalBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                dhikrGoalBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                
+                const target = btn.dataset.target;
+                if (target === 'infinity') {
+                    dhikrGoal = Infinity;
+                } else {
+                    dhikrGoal = parseInt(target, 10);
+                }
+                
+                dhikrCount = 0;
+                updateDhikrDisplay();
+            });
+        });
+    }
+
+    function updateDhikrDisplay() {
+        dhikrCountDisplay.textContent = dhikrCount;
+        if (dhikrGoal !== Infinity) {
+            dhikrGoalDisplay.textContent = `Nga ${dhikrGoal}`;
+            if (dhikrCount >= dhikrGoal) {
+                if (navigator.vibrate) navigator.vibrate([100, 50, 100]); // long vibrate
+                dhikrCount = 0; // reset automatically
+            }
+        } else {
+            dhikrGoalDisplay.textContent = "I pafundëm";
+        }
+    }
+
+    async function fetch99Names() {
+        namesList.innerHTML = '<div class="loading">Duke ngarkuar...</div>';
+        try {
+            const res = await fetch('https://api.aladhan.com/v1/asmaAlHusna');
+            const data = await res.json();
+            
+            if (data.code === 200) {
+                namesList.innerHTML = '';
+                data.data.forEach(name => {
+                    let transliterationRaw = name.transliteration;
+                    
+                    // Sanitize the search key (remove all non-alphabetic chars and lower case)
+                    let searchKey = transliterationRaw.replace(/[^a-zA-Z]/g, '').toLowerCase();
+                    let albMeaning = null;
+
+                    if (typeof alb99Names !== 'undefined') {
+                        // Find a match in the dictionary using the sanitized key
+                        for (const [key, val] of Object.entries(alb99Names)) {
+                            if (key.replace(/[^a-zA-Z]/g, '').toLowerCase() === searchKey) {
+                                albMeaning = val;
+                                break;
+                            }
+                        }
+                    }
+                    
+                    if (!albMeaning) {
+                        // Fallback loosely just in case
+                        albMeaning = name.en.meaning; 
+                    }
+
+                    const el = document.createElement('div');
+                    el.className = 'name-item';
+                    el.innerHTML = `
+                        <div class="name-arabic">${name.name}</div>
+                        <div class="name-transliteration">${transliterationRaw}</div>
+                        <div class="name-english">${name.en.meaning}</div>
+                        <div class="name-albanian">${albMeaning}</div>
+                    `;
+                    namesList.appendChild(el);
+                });
+                namesLoaded = true;
+            }
+        } catch (e) {
+            namesList.innerHTML = '<p style="text-align:center;color:var(--text-secondary);">Gabim gjatë ngarkimit. Provo përsëri më vonë.</p>';
+        }
+    }
+
+    // =============================================
+    //  QIBLA COMPASS
+    // =============================================
+    function setupQiblaEvents() {
+        calibrateCompassBtn.addEventListener('click', requestCompassPermission);
+    }
+
+    function requestCompassPermission() {
+        if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+            DeviceOrientationEvent.requestPermission()
+                .then(permissionState => {
+                    if (permissionState === 'granted') {
+                        startCompass();
+                    } else {
+                        qiblaStatus.textContent = "Leja u refuzua. Busulla nuk mund të funksionojë.";
+                    }
+                })
+                .catch(console.error);
+        } else {
+            // Non iOS 13+ devices
+            startCompass();
+        }
+    }
+
+    function startCompass() {
+        calibrateCompassBtn.classList.add('hidden');
+        qiblaStatus.textContent = "Lëvizni pajisjen në formë numrit 8 për të kalibruar (Mbajeni pajisjen rafsh).";
+        
+        // Use a fixed bearing of 137 degrees from Kosovo to Mecca (approximate).
+        // Since we don't fetch exact user GPS to keep it simple and private, 137 works perfectly for Kosovo.
+        
+        window.addEventListener('deviceorientationabsolute', handleOrientation, true);
+        
+        // Fallback for devices that only support deviceorientation
+        if (!('ondeviceorientationabsolute' in window)) {
+            window.addEventListener('deviceorientation', handleOrientation, true);
+        }
+    }
+
+    function handleOrientation(event) {
+        let alpha = event.alpha; // Compass heading if available directly
+        
+        // Attempt to get absolute heading if webkit is used
+        if (event.webkitCompassHeading) {
+            alpha = event.webkitCompassHeading;
+        } else if (alpha !== null) {
+            // Absolute alpha is 0 at North, goes counter-clockwise. Webkit heading is 0 at North, clockwise.
+            // Converting alpha to standard compass heading degrees (0-360):
+            alpha = 360 - alpha;
+        }
+
+        if (alpha !== null) {
+            // Calculate Kaaba rotation relative to North
+            // The phone is pointing at 'alpha' degrees right from North
+            // If Kaaba is at 137 degrees right from North, then:
+            const kaabaRelative = qiblaHeading - alpha;
+            
+            // Rotate the compass inner container
+            compassInner.style.transform = `rotate(${-alpha}deg)`;
+            
+            // Re-rotate the Kaaba icon so it stands upright but sits at the 137deg angle
+            // Actually, setting the Kaaba icon at 137 degrees fixed in the inner compass:
+            const kaabaIcon = document.getElementById('compass-kaaba');
+            // The inner dial rotates so North remains absolute. 
+            // So Kaaba should be placed exactly at 137 deg on the dial.
+            kaabaIcon.style.transform = `translateX(-50%) rotate(${qiblaHeading}deg) translateY(-90px) rotate(${-qiblaHeading}deg)`;
+            
+            // Update status when pointing right at Qibla (tolerance 5 degrees)
+            let diff = Math.abs(alpha - qiblaHeading);
+            if (diff > 180) diff = 360 - diff;
+            
+            if (diff < 5) {
+                qiblaStatus.textContent = "Ju jeni drejtuar nga Qabja! 🕋";
+                qiblaStatus.style.color = "var(--accent)";
+                if (navigator.vibrate) navigator.vibrate(100);
+            } else {
+                qiblaStatus.textContent = "Rrotullohuni drejt ikonës së Qabes.";
+                qiblaStatus.style.color = "var(--text-secondary)";
+            }
+        } else {
+            qiblaStatus.textContent = "Sensori nuk jep të dhëna.";
+        }
+    }
+
 });
+
