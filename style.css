@@ -726,19 +726,24 @@ header h1 {
     background: radial-gradient(circle, var(--card-bg) 0%, rgba(15, 23, 42, 0) 100%);
 }
 
-.compass-outer::before {
-    content: 'N';
+.compass-marker {
     position: absolute;
+    font-weight: bold;
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+}
+.compass-marker.N {
     top: 10px;
     color: var(--text-primary);
-    font-weight: bold;
 }
-.compass-outer::after {
-    content: 'S';
-    position: absolute;
+.compass-marker.E {
+    right: 15px;
+}
+.compass-marker.S {
     bottom: 10px;
-    color: var(--text-secondary);
-    font-weight: bold;
+}
+.compass-marker.W {
+    left: 15px;
 }
 .compass-inner {
     width: 100%;

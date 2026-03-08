@@ -326,7 +326,7 @@ document.addEventListener('DOMContentLoaded', () => {
         readerBackBtn.addEventListener('click', () => {
             if (!surahAudio.paused) {
                 surahAudio.pause();
-                audioPlayBtn.innerHTML = '<span class="audio-icon">▶</span>';
+                audioPlayBtn.innerHTML = '<span class="audio-icon">▶</span> Ndëgjo';
             }
             showSurahList();
         });
@@ -366,7 +366,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         surahAudio.addEventListener('ended', () => {
-            audioPlayBtn.innerHTML = '<span class="audio-icon">▶</span>';
+            audioPlayBtn.innerHTML = '<span class="audio-icon">▶</span> Ndëgjo';
             audioProgress.value = 0;
             audioTimeCurrent.textContent = "0:00";
         });
@@ -390,10 +390,10 @@ document.addEventListener('DOMContentLoaded', () => {
     function toggleAudio() {
         if (surahAudio.paused) {
             surahAudio.play();
-            audioPlayBtn.innerHTML = '<span class="audio-icon">⏸</span>';
+            audioPlayBtn.innerHTML = '<span class="audio-icon">⏸</span> Pauzo';
         } else {
             surahAudio.pause();
-            audioPlayBtn.innerHTML = '<span class="audio-icon">▶</span>';
+            audioPlayBtn.innerHTML = '<span class="audio-icon">▶</span> Ndëgjo';
         }
     }
 
@@ -509,7 +509,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Prep Audio
             surahAudio.src = `https://cdn.islamic.network/quran/audio-surah/128/ar.alafasy/${surahNumber}.mp3`;
             surahAudio.load();
-            audioPlayBtn.innerHTML = '<span class="audio-icon">▶</span>';
+            audioPlayBtn.innerHTML = '<span class="audio-icon">▶</span> Ndëgjo';
             audioProgressContainer.classList.add('hidden');
             audioProgress.value = 0;
             audioTimeCurrent.textContent = "0:00";
