@@ -45,6 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- DOM Elements (Qibla) ---
     const qiblaView = document.getElementById('qibla-view');
     const compassInner = document.getElementById('compass');
+    const qiblaPointer = document.getElementById('qibla-pointer');
     const calibrateCompassBtn = document.getElementById('calibrate-compass-btn');
     const qiblaStatus = document.getElementById('qibla-status');
 
@@ -957,23 +958,18 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (alpha !== null) {
-            // Calculate Kaaba rotation relative to North
-            // The phone is pointing at 'alpha' degrees right from North
-            // If Kaaba is at 137 degrees right from North, then:
-            const kaabaRelative = qiblaHeading - alpha;
-            
-            // Rotate the compass inner container
+            // Rotate the compass inner container (so N, E, S, W stay at absolute bearings)
             compassInner.style.transform = `rotate(${-alpha}deg)`;
             
-            // Re-rotate the Kaaba icon so it stands upright but sits at the 137deg angle
-            // Actually, setting the Kaaba icon at 137 degrees fixed in the inner compass:
-            const kaabaIcon = document.getElementById('compass-kaaba');
-            // The inner dial rotates so North remains absolute. 
-            // So Kaaba should be placed exactly at 137 deg on the dial.
-            kaabaIcon.style.transform = `translateX(-50%) rotate(${qiblaHeading}deg) translateY(-90px) rotate(${-qiblaHeading}deg)`;
+            // Calculate Kaaba rotation relative to the phone's current facing direction
+            // The phone points to 'alpha' from North. Kaaba is at 'qiblaHeading' from North.
+            const kaabaRelative = qiblaHeading - alpha;
+            
+            // Rotate the Qibla pointer (arrow + Kaaba icon) to point directly at Mecca
+            qiblaPointer.style.transform = `translate(-50%, -100%) rotate(${kaabaRelative}deg)`;
             
             // Update status when pointing right at Qibla (tolerance 5 degrees)
-            let diff = Math.abs(alpha - qiblaHeading);
+            let diff = Math.abs(kaabaRelative);
             if (diff > 180) diff = 360 - diff;
             
             if (diff < 5) {
@@ -981,7 +977,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 qiblaStatus.style.color = "var(--accent)";
                 if (navigator.vibrate) navigator.vibrate(100);
             } else {
-                qiblaStatus.textContent = "Rrotullohuni drejt ikonës së Qabes.";
+                qiblaStatus.textContent = "Ndiqni shigjetën drejt ikonës së Qabes.";
                 qiblaStatus.style.color = "var(--text-secondary)";
             }
         } else {

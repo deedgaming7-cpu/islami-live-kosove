@@ -747,30 +747,43 @@ header h1 {
     transition: transform 0.1s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
-.compass-arrow {
+.qibla-pointer {
     position: absolute;
     top: 50%;
     left: 50%;
     width: 4px;
-    height: 50%;
-    background: linear-gradient(to top, transparent 0%, transparent 50%, var(--accent) 50%, var(--accent) 100%);
-    transform: translate(-50%, -50%);
+    height: 110px;
+    transform-origin: bottom center;
+    transform: translate(-50%, -100%) rotate(0deg);
+    z-index: 10;
+    transition: transform 0.1s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     pointer-events: none;
 }
+
+.compass-arrow {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 4px;
+    height: 100%;
+    background: linear-gradient(to top, transparent 0%, transparent 20%, var(--accent) 50%, var(--accent) 100%);
+}
+
 .compass-arrow::after {
     content: '';
     position: absolute;
     top: 0;
     left: 50%;
-    transform: translateX(-50%);
-    border-width: 0 6px 12px 6px;
+    transform: translate(-50%, -50%);
+    border-width: 0 8px 16px 8px;
     border-style: solid;
     border-color: transparent transparent var(--accent) transparent;
 }
 
 .compass-kaaba {
     position: absolute;
-    top: 20px;
+    top: -45px;
     left: 50%;
     transform: translateX(-50%);
     font-size: 2rem;
