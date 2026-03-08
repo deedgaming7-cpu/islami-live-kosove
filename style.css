@@ -18,6 +18,9 @@ body {
     font-family: 'Montserrat', sans-serif;
     background-color: var(--bg-color);
     color: var(--text-primary);
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
     display: flex;
     justify-content: center;
     min-height: 100vh;
@@ -252,15 +255,16 @@ header h1 {
     bottom: 0;
     left: 0;
     right: 0;
+    padding: 1rem 0;
+    padding-bottom: calc(1rem + env(safe-area-inset-bottom));
     display: flex;
-    justify-content: center;
-    gap: 0;
+    justify-content: space-around;
+    z-index: 50;
     background: rgba(15, 23, 42, 0.85);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border-top: 1px solid rgba(202, 138, 4, 0.2);
     z-index: 100;
-    padding: 0;
 }
 
 .nav-tab {

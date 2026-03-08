@@ -633,6 +633,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
         updateTimer();
         countdownInterval = setInterval(updateTimer, 1000);
+
+        // Resume correctly when app returns from iOS background sleep
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden && prayerTimes) {
+                updateTimer();
+                // Ensure loop is running
+                clearInterval(countdownInterval);
+                countdownInterval = setInterval(updateTimer, 1000);
+            }
+        });
     }
 
     function updateTimer() {
