@@ -284,7 +284,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Pause audio if leaving quran-view
         if (viewId !== 'quran-view' && !surahAudio.paused) {
             surahAudio.pause();
-            audioPlayBtn.innerHTML = '<span class="audio-icon">▶</span>';
+            audioPlayBtn.innerHTML = '<span class="audio-icon">▶</span> Ndëgjo';
         }
 
         // Update tabs
