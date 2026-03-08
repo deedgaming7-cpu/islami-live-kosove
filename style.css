@@ -592,6 +592,7 @@ header h1 {
         opacity: 0;
         transform: translateY(20px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -663,6 +664,7 @@ header h1 {
 .audio-btn:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 15px rgba(202, 138, 4, 0.4);
+    color: var(--bg-color);
 }
 
 .audio-progress-container {
@@ -693,6 +695,7 @@ header h1 {
     appearance: none;
     border-radius: 2px;
 }
+
 #audio-progress::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
@@ -740,19 +743,24 @@ header h1 {
     color: var(--text-secondary);
     font-size: 1.1rem;
 }
+
 .compass-marker.N {
     top: 10px;
     color: var(--text-primary);
 }
+
 .compass-marker.E {
     right: 15px;
 }
+
 .compass-marker.S {
     bottom: 10px;
 }
+
 .compass-marker.W {
     left: 15px;
 }
+
 .compass-inner {
     width: 100%;
     height: 100%;
@@ -800,7 +808,7 @@ header h1 {
     left: 50%;
     transform: translateX(-50%);
     font-size: 2rem;
-    filter: drop-shadow(0 0 5px rgba(0,0,0,0.5));
+    filter: drop-shadow(0 0 5px rgba(0, 0, 0, 0.5));
 }
 
 .qibla-info {
@@ -855,7 +863,7 @@ header h1 {
     gap: 1rem;
     cursor: pointer;
     transition: all 0.2s;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .more-card:hover {
@@ -907,7 +915,7 @@ header h1 {
     padding: 2rem 1.5rem;
     position: relative;
     border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
 }
 
 .close-modal-btn {
@@ -944,12 +952,12 @@ header h1 {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    background: rgba(0,0,0,0.2);
+    background: rgba(0, 0, 0, 0.2);
     padding: 1.25rem 1rem;
     border-radius: 0.5rem;
     text-align: center;
     gap: 0.3rem;
-    border: 1px solid rgba(255,255,255,0.02);
+    border: 1px solid rgba(255, 255, 255, 0.02);
 }
 
 .name-arabic {
@@ -1027,7 +1035,7 @@ header h1 {
     font-weight: bold;
     font-family: 'Montserrat', sans-serif;
     border: 4px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 10px 20px rgba(0,0,0,0.3), inset 0 0 20px rgba(255,255,255,0.2);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3), inset 0 0 20px rgba(255, 255, 255, 0.2);
     cursor: pointer;
     margin: 0 auto 1.5rem;
     display: flex;
@@ -1068,9 +1076,11 @@ header h1 {
     color: var(--text-secondary);
     line-height: 1.6;
 }
+
 .article-content li {
     margin-bottom: 0.5rem;
 }
+
 .article-content strong {
     color: var(--accent);
 }
